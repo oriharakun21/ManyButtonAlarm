@@ -71,7 +71,7 @@ void setup() {
 void loop() {
   if(alarmF){
     // アラーム
-    alarmStopEnd();
+    if((digitalRead(in_stopAlarm) == HIGH) || snooze()) alarmStopEnd(); 
     alarmStop();
   } else {
     // 時計
@@ -92,6 +92,22 @@ void loop() {
   }
   // 12時更新
   if(now.hour() == 0 && now.minute() == 0) updateTime = true;
+}
+// アラームセット30分後の判定
+boolean snooze(){
+  int tmpHour = setHour;
+  int tmpMinute = setMinute + 30;
+
+  if(tmpMinute >= 60){
+    tmpHour = tmpHour + 1;
+    tmpMinute = tmpMinute - 60;   
+  }
+  
+  if(tmpHour == now.hour() && tmpMinute ==  now.minute()){
+    return true; 
+  } else {
+    return false;
+  }
 }
 // アラームの設定
 void alarmSet(){
@@ -172,16 +188,13 @@ void alarmStop(){
     myservo.write(a0);
   }
 }
-
 void alarmStopEnd(){
-  if(digitalRead(in_stopAlarm) == HIGH){
     alarmF = false; // out_startPとセットのアラーム起動中フラグ
     digitalWrite(out_startP, LOW);
     digitalWrite(out_lampP, LOW);
     updateTime=true;
     myservo.detach();
     delay(300);
-  }
 }
 // アラーム作動中の表示
 void alarmMesserge(){
